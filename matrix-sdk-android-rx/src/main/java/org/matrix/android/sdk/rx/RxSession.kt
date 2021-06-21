@@ -24,7 +24,7 @@ import kotlinx.coroutines.rx2.rxSingle
 import org.matrix.android.sdk.api.extensions.orFalse
 import org.matrix.android.sdk.api.query.QueryStringValue
 import org.matrix.android.sdk.api.session.Session
-import org.matrix.android.sdk.api.session.accountdata.UserAccountDataEvent
+import org.matrix.android.sdk.api.session.accountdata.AccountDataEvent
 import org.matrix.android.sdk.api.session.crypto.crosssigning.KEYBACKUP_SECRET_SSSS_NAME
 import org.matrix.android.sdk.api.session.crypto.crosssigning.MASTER_KEY_SSSS_NAME
 import org.matrix.android.sdk.api.session.crypto.crosssigning.MXCrossSigningInfo
@@ -176,10 +176,10 @@ class RxSession(private val session: Session) {
                 }
     }
 
-    fun liveUserAccountData(types: Set<String>): Observable<List<UserAccountDataEvent>> {
-        return session.accountDataService().getLiveUserAccountDataEvents(types).asObservable()
+    fun liveUserAccountData(types: Set<String>): Observable<List<AccountDataEvent>> {
+        return session.userAccountDataService().getLiveAccountDataEvents(types).asObservable()
                 .startWithCallable {
-                    session.accountDataService().getUserAccountDataEvents(types)
+                    session.userAccountDataService().getAccountDataEvents(types)
                 }
     }
 
@@ -200,7 +200,7 @@ class RxSession(private val session: Session) {
     }
 
     fun liveSecretSynchronisationInfo(): Observable<SecretsSynchronisationInfo> {
-        return Observable.combineLatest<List<UserAccountDataEvent>, Optional<MXCrossSigningInfo>, Optional<PrivateKeysInfo>, SecretsSynchronisationInfo>(
+        return Observable.combineLatest<List<AccountDataEvent>, Optional<MXCrossSigningInfo>, Optional<PrivateKeysInfo>, SecretsSynchronisationInfo>(
                 liveUserAccountData(setOf(MASTER_KEY_SSSS_NAME, USER_SIGNING_KEY_SSSS_NAME, SELF_SIGNING_KEY_SSSS_NAME, KEYBACKUP_SECRET_SSSS_NAME)),
                 liveCrossSigningInfo(session.myUserId),
                 liveCrossSigningPrivateKeys(),
