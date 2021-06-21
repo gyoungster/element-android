@@ -18,10 +18,12 @@ package im.vector.app.features.crypto.keys
 
 import android.content.Context
 import android.net.Uri
+import android.os.ConditionVariable
 import im.vector.app.core.intent.getMimeTypeFromUri
 import im.vector.app.core.resources.openResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.matrix.android.sdk.api.MatrixCallback
 import org.matrix.android.sdk.api.session.Session
 import org.matrix.android.sdk.internal.crypto.model.ImportRoomKeysResult
 import javax.inject.Inject
@@ -40,7 +42,23 @@ class KeysImporter @Inject constructor(
             val resource = openResource(context, uri, mimetype ?: getMimeTypeFromUri(context, uri))
             val stream = resource?.mContentStream ?: throw Exception("Error")
             val data = stream.use { it.readBytes() }
-            session.cryptoService().importRoomKeys(data, password, null)
+            val lock = ConditionVariable()
+            var result = ImportRoomKeysResult(0, 0)
+            session.cryptoService().importRoomKeys(data, password, null,
+                    object : MatrixCallback<ImportRoomKeysResult> {
+                        override fun onSuccess(data: ImportRoomKeysResult) {
+                            super.onSuccess(data)
+                            result = data
+                            lock.open()
+                        }
+
+                        override fun onFailure(failure: Throwable) {
+                            super.onFailure(failure)
+                            lock.open()
+                        }
+            })
+            lock.block()
+            result
         }
     }
 }

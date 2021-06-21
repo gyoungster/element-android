@@ -20,6 +20,7 @@ import android.content.Context
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.matrix.android.sdk.api.MatrixCallback
 import org.matrix.android.sdk.api.session.Session
 import javax.inject.Inject
 
@@ -32,10 +33,14 @@ class KeysExporter @Inject constructor(
      */
     suspend fun export(password: String, uri: Uri) {
         return withContext(Dispatchers.IO) {
-            val data = session.cryptoService().exportRoomKeys(password)
-            context.contentResolver.openOutputStream(uri)
-                    ?.use { it.write(data) }
-                    ?: throw IllegalStateException("Unable to open file for writting")
+            session.cryptoService().exportRoomKeys(password, object : MatrixCallback<ByteArray> {
+                override fun onSuccess(data: ByteArray) {
+                    super.onSuccess(data)
+                    context.contentResolver.openOutputStream(uri)
+                            ?.use { it.write(data) }
+                            ?: throw IllegalStateException("Unable to open file for writting")
+                }
+            })
         }
     }
 }
