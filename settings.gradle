@@ -1,5 +1,4 @@
 include ':vector'
-include ':matrix-sdk-android'
 include ':matrix-sdk-android-rx'
 include ':diff-match-patch'
 include ':attachment-viewer'

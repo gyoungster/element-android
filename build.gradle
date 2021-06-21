@@ -10,6 +10,7 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
@@ -32,6 +33,7 @@ allprojects {
             content {
                 // Use this repo only for olm library
                 includeGroupByRegex "org\\.matrix\\.gitlab\\.matrix-org"
+                includeGroupByRegex "com\\.github\\.matrix-org"
                 // And also for FilePicker
                 includeGroupByRegex "com\\.github\\.jaiselrahman"
                 // And monarchy
@@ -112,22 +114,6 @@ project(":diff-match-patch") {
     }
 }
 
-//project(":matrix-sdk-android") {
-//    sonarqube {
-//        properties {
-//            property "sonar.sources", project(":matrix-sdk-android").android.sourceSets.main.java.srcDirs
-//            // exclude source code from analyses separated by a colon (:)
-//            // property "sonar.exclusions", "**/*.*"
-//        }
-//    }
-//}
-//
-//project(":matrix-sdk-android-rx") {
-//    sonarqube {
-//        properties {
-//            property "sonar.sources", project(":matrix-sdk-android-rx").android.sourceSets.main.java.srcDirs
-//            // exclude source code from analyses separated by a colon (:)
-//            // property "sonar.exclusions", "**/*.*"
-//        }
-//    }
-//}
+ext {
+    matrix_android_sdk = "v1.1.5"
+}
